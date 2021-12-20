@@ -44,12 +44,49 @@ dag = DAG(
 )
 
 
-def print_hello():
-    return 'Hello world from first Airflow DAG!'
+def main():
+    url = 'https://api.coincap.io/v2/rates/bitcoin'
+    r = requests.get(url)
+    r.encoding = 'utf-8'
+    data = json.loads(r.text)
+
+    id = data['data']['id']
+    symbol = data['data']['symbol']
+    currencysymbol = data['data']['currencySymbol']
+    rateUsd = data['data']['rateUsd']
+    type =  data['data']['type']
+
+    insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+
+
+
+def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
+    try:
+        conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
+                    database="analytics",
+                    user="semen", 
+                    password="OTUSBESTCOURCES", 
+                    port="6432",
+                    target_session_attrs="read-write",
+                    sslmode="verify-full"
+                    )
+        # conn = psycopg2.connect("host=localhost dbname=analytics user=postgres password=3321")
+        cur = conn.cursor()
+        #cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
+        cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
+
+        conn.commit()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)   
+    finally:
+        if conn is not None:
+            conn.close()
+
 
 bitCoinRates = PythonOperator(
-    task_id='hello_task', 
-    python_callable=print_hello,
+    task_id='bitCoinRates', 
+    python_callable=main,
     dag=dag)
 
 bitCoinRates.doc_md = dedent(
