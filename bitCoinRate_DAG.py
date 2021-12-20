@@ -25,8 +25,7 @@ def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
         # conn = psycopg2.connect("host=localhost dbname=analytics user=postgres password=3321")
         cur = conn.cursor()
         #cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
-        cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)"
-                        , (id, symbol, currencysymbol, rateusd, type))
+        cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
 
         conn.commit()
         cur.close()
