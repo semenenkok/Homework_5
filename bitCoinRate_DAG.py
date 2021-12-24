@@ -71,7 +71,11 @@ def main():
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
     try:
-        params = config(filename='database.ini', section='yandexCloud')
+        env = {'filename':'database.ini',
+               'section':'yandexCloud'
+        }
+
+        params = config(**env)
         conn = psycopg2.connect(**params)
     except (Exception, psycopg2.DatabaseError) as err:
         print("Database connection error: {0}".format(err))
