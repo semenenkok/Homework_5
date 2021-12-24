@@ -21,7 +21,7 @@ def main():
         insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
     else:
         print('api response code is: ' + str(r.status_code))
-
+        raise
 
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
@@ -29,6 +29,7 @@ def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
         conn = psycopg2.connect(host="localhost", database="analytics", user="postgres", password="3321", port="5432")
     except (Exception, psycopg2.DatabaseError) as err:
         print("Database connection error: {0}".format(err))
+        raise
 
     if conn is not None:
         try:
@@ -39,6 +40,7 @@ def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
             cur.close()
         except (Exception) as error:
             print(error)   
+            raise
         finally:
             conn.close()
 
