@@ -7,7 +7,7 @@ import psycopg2
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
-from config import config
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
 
@@ -34,7 +34,7 @@ default_args = {
     # 'trigger_rule': 'all_success'
 }
 
-dag = DAG(
+with DAG(
     dag_id='bitCoinRate_DAG',
     default_args=default_args,
     description='BitCoinRates loader DAG',
@@ -42,65 +42,79 @@ dag = DAG(
     start_date=datetime(2021, 12, 20),
     catchup=False,
     tags=['homework 5'],
-)
+) as dag:
+
+    # [START create_bitcoinrate_table]
+    create_bitcoinrate_table = PostgresOperator(
+        task_id="create_bitcoinrate_table",
+        postgres_conn_id="analytics",
+        sql="""create table bitcoinrates2(
+                    ts             timestamp with time zone default CURRENT_TIMESTAMP,
+                    id             varchar(50),
+                    symbol         varchar(50),
+                    currencysymbol varchar(5),
+                    rateusd        numeric(38, 16),
+                    type           varchar(50));
+            """,
+    )
+    # [END create_bitcoinrate_table]
 
 
 
 
-def main():
-    url = 'https://api.coincap.io/v2/rates/bitcoin'
-    r = requests.get(url)
-    r.encoding = 'utf-8'
-    if r.status_code == 200:
-        data = json.loads(r.text)
+# def main():
+#     url = 'https://api.coincap.io/v2/rates/bitcoin'
+#     r = requests.get(url)
+#     r.encoding = 'utf-8'
+#     if r.status_code == 200:
+#         data = json.loads(r.text)
 
-        id = data['data']['id']
-        symbol = data['data']['symbol']
-        currencysymbol = data['data']['currencySymbol']
-        rateUsd = data['data']['rateUsd']
-        type =  data['data']['type']
+#         id = data['data']['id']
+#         symbol = data['data']['symbol']
+#         currencysymbol = data['data']['currencySymbol']
+#         rateUsd = data['data']['rateUsd']
+#         type =  data['data']['type']
 
-        insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
-    else:
-        print('api response code is: ' + str(r.status_code))
-        raise
-
-
-
-
-def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
-    conn = None
-    try:
-        env = {'filename':'database.ini',
-               'section':'yandexCloud'
-        }
-
-        params = config(**env)
-        conn = psycopg2.connect(**params)
-    except (Exception, psycopg2.DatabaseError) as err:
-        print("Database connection error: {0}".format(err))
-        raise
-
-    if conn is not None:
-        try:
-            cur = conn.cursor()
-            #cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
-            cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
-            conn.commit()
-            cur.close()
-        except (Exception) as error:
-            print(error)   
-            raise
-        finally:
-            conn.close()
+#         insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+#     else:
+#         print('api response code is: ' + str(r.status_code))
+#         raise
 
 
 
 
-bitCoinRates = PythonOperator(
-    task_id='bitCoinRates', 
-    python_callable=main,
-    dag=dag)
+# def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
+#     conn = None
+#     try:
+#         env = {'filename':'database.ini',
+#                'section':'yandexCloud'
+#         }
+
+#         params = config(**env)
+#         conn = psycopg2.connect(**params)
+#     except (Exception, psycopg2.DatabaseError) as err:
+#         print("Database connection error: {0}".format(err))
+#         raise
+
+#     if conn is not None:
+#         try:
+#             cur = conn.cursor()
+#             cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
+#             conn.commit()
+#             cur.close()
+#         except (Exception) as error:
+#             print(error)   
+#             raise
+#         finally:
+#             conn.close()
+
+
+
+
+# bitCoinRates = PythonOperator(
+#     task_id='bitCoinRates', 
+#     python_callable=main,
+#     dag=dag)
 
 
 
@@ -127,4 +141,4 @@ bitCoinRates = PythonOperator(
 #     """
 # )
 
-bitCoinRates
+create_bitcoinrate_table
