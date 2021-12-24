@@ -2,7 +2,7 @@ import requests
 import json
 import psycopg2
 from psycopg2 import OperationalError, errorcodes, errors
-import sys
+from config import config
 
 
 def main():

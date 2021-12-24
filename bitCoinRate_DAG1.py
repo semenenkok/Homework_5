@@ -45,6 +45,7 @@ dag = DAG(
 
 
 def main():
+    print("{{ dag_run.conf['serverName'] }}")
     url = 'https://api.coincap.io/v2/rates/bitcoin'
     r = requests.get(url)
     r.encoding = 'utf-8'
