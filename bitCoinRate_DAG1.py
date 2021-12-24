@@ -34,7 +34,7 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id='bitCoinRates2',
+    dag_id='bitCoinRates',
     default_args=default_args,
     description='BitCoinRates loader DAG',
     schedule_interval='*/30 * * * *',
