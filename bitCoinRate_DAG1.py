@@ -43,11 +43,15 @@ dag = DAG(
     tags=['homework 5'],
 )
 
-#Parameters
-host = "{{ dag_run.conf['host'] }}"
+#Parameters 
+api = "{{ dag_run.conf['api'] }}"
 
-def main(host):
-    url = 'https://api.coincap.io/v2/rates/bitcoin'
+
+
+
+
+def main(api):
+    url = api
     r = requests.get(url)
     r.encoding = 'utf-8'
     if r.status_code == 200:
@@ -59,18 +63,18 @@ def main(host):
         rateUsd = data['data']['rateUsd']
         type =  data['data']['type']
 
-        insert_bitcoinRates(host, id, symbol, currencysymbol, rateUsd, type)
+        insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
     else:
         print('api response code is: ' + str(r.status_code))
         raise
 
 
 
-def insert_bitcoinRates(host, id, symbol, currencysymbol, rateusd, type):
+
+def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
     try:
-        # conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
-        conn = psycopg2.connect(host=host,
+        conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
                     database="analytics",
                     user="semen", 
                     password="OTUSBESTCOURCES", 
@@ -96,11 +100,16 @@ def insert_bitcoinRates(host, id, symbol, currencysymbol, rateusd, type):
             conn.close()
 
 
+
+
 bitCoinRates = PythonOperator(
     task_id='bitCoinRates', 
     python_callable=main,
-    op_kwargs={"host": host},
+    op_kwargs={"api": api},
     dag=dag)
+
+
+
 
 # bitCoinRates.doc_md = dedent(
 #         """\
