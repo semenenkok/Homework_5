@@ -4,11 +4,12 @@ import requests
 import json
 import psycopg2
 
-
 from airflow import DAG
-# from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
+from config import config
+
+
 
 default_args = {
     'owner': 'airflow',
@@ -34,7 +35,7 @@ default_args = {
 }
 
 dag = DAG(
-    dag_id='bitCoinRates',
+    dag_id='bitCoinRate_DAG',
     default_args=default_args,
     description='BitCoinRates loader DAG',
     schedule_interval='*/30 * * * *',
@@ -43,15 +44,11 @@ dag = DAG(
     tags=['homework 5'],
 )
 
-#Parameters 
-api = "{{ dag_run.conf['api'] }}"
 
 
 
-
-
-def main(api):
-    url = api
+def main():
+    url = 'https://api.coincap.io/v2/rates/bitcoin'
     r = requests.get(url)
     r.encoding = 'utf-8'
     if r.status_code == 200:
@@ -74,14 +71,8 @@ def main(api):
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
     try:
-        conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
-                    database="analytics",
-                    user="semen", 
-                    password="OTUSBESTCOURCES", 
-                    port="6432",
-                    target_session_attrs="read-write",
-                    sslmode="verify-full"
-                    )
+        params = config('database.ini', 'yandexCloud')
+        conn = psycopg2.connect(**params)
     except (Exception, psycopg2.DatabaseError) as err:
         print("Database connection error: {0}".format(err))
         raise
@@ -105,7 +96,6 @@ def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
 bitCoinRates = PythonOperator(
     task_id='bitCoinRates', 
     python_callable=main,
-    op_kwargs={"api": api},
     dag=dag)
 
 

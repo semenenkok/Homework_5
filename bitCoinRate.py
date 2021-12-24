@@ -26,7 +26,13 @@ def main():
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
     try:
-        conn = psycopg2.connect(host="localhost", database="analytics", user="postgres", password="3321", port="5432")
+        env = {'filename':'database.ini',
+               'section':'homeDell'
+        }
+
+        params = config(**env)
+        # conn = psycopg2.connect(host="localhost", database="analytics", user="postgres", password="3321", port="5432")
+        conn = psycopg2.connect(**params)
     except (Exception, psycopg2.DatabaseError) as err:
         print("Database connection error: {0}".format(err))
         raise
