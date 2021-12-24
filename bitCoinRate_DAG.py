@@ -48,7 +48,7 @@ with DAG(
     create_bitcoinrate_table = PostgresOperator(
         task_id="create_bitcoinrate_table",
         postgres_conn_id="analytics",
-        sql="""create table bitcoinrates2(
+        sql="""create table if not exists bitcoinrates2(
                     ts             timestamp with time zone default CURRENT_TIMESTAMP,
                     id             varchar(50),
                     symbol         varchar(50),
