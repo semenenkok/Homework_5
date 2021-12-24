@@ -68,7 +68,8 @@ def main():
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
     conn = None
     try:
-        conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
+        # conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
+        conn = psycopg2.connect(host="{{ dag_run.conf['serverName'] }}",
                     database="analytics",
                     user="semen", 
                     password="OTUSBESTCOURCES", 
