@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
-from textwrap import dedent
+# from textwrap import dedent
 import requests
 import json
 import psycopg2
 
 
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
+# from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 
@@ -48,19 +48,24 @@ def main():
     url = 'https://api.coincap.io/v2/rates/bitcoin'
     r = requests.get(url)
     r.encoding = 'utf-8'
-    data = json.loads(r.text)
+    if r.status_code == 200:
+        data = json.loads(r.text)
 
-    id = data['data']['id']
-    symbol = data['data']['symbol']
-    currencysymbol = data['data']['currencySymbol']
-    rateUsd = data['data']['rateUsd']
-    type =  data['data']['type']
+        id = data['data']['id']
+        symbol = data['data']['symbol']
+        currencysymbol = data['data']['currencySymbol']
+        rateUsd = data['data']['rateUsd']
+        type =  data['data']['type']
 
-    insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+        insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+    else:
+        print('api response code is: ' + str(r.status_code))
+
 
 
 
 def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
+    conn = None
     try:
         conn = psycopg2.connect(host="rc1c-6aq36ytblcrw3avn.mdb.yandexcloud.net",
                     database="analytics",
@@ -70,17 +75,19 @@ def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
                     target_session_attrs="read-write",
                     sslmode="verify-full"
                     )
-        # conn = psycopg2.connect("host=localhost dbname=analytics user=postgres password=3321")
-        cur = conn.cursor()
-        #cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
-        cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
+    except (Exception, psycopg2.DatabaseError) as err:
+        print("Database connection error: {0}".format(err))
 
-        conn.commit()
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)   
-    finally:
-        if conn is not None:
+    if conn is not None:
+        try:
+            cur = conn.cursor()
+            #cur.execute("CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);")
+            cur.execute("insert into bitcoinrates (id, symbol, currencysymbol, rateusd, type) VALUES (%s, %s, %s, %s, %s)", (id, symbol, currencysymbol, rateusd, type))
+            conn.commit()
+            cur.close()
+        except (Exception) as error:
+            print(error)   
+        finally:
             conn.close()
 
 
@@ -89,26 +96,26 @@ bitCoinRates = PythonOperator(
     python_callable=main,
     dag=dag)
 
-bitCoinRates.doc_md = dedent(
-        """\
-    #### Task Documentation
-    Bla bla bla.
-    ![img](http://montcs.bloomu.edu/~bobmon/Semesters/2012-01/491/import%20soul.png)
-    """
-    )
+# bitCoinRates.doc_md = dedent(
+#         """\
+#     #### Task Documentation
+#     Bla bla bla.
+#     ![img](http://montcs.bloomu.edu/~bobmon/Semesters/2012-01/491/import%20soul.png)
+#     """
+#     )
 
-dag.doc_md = __doc__  # providing that you have a docstring at the beginning of the DAG
-dag.doc_md = """
-    This is a documentation placed anywhere
-    """  # otherwise, type it like this
-templated_command = dedent(
-        """
-    {% for i in range(5) %}
-        echo "{{ ds }}"
-        echo "{{ macros.ds_add(ds, 7)}}"
-        echo "{{ params.my_param }}"
-    {% endfor %}
-    """
-)
+# dag.doc_md = __doc__  # providing that you have a docstring at the beginning of the DAG
+# dag.doc_md = """
+#     This is a documentation placed anywhere
+#     """  # otherwise, type it like this
+# templated_command = dedent(
+#         """
+#     {% for i in range(5) %}
+#         echo "{{ ds }}"
+#         echo "{{ macros.ds_add(ds, 7)}}"
+#         echo "{{ params.my_param }}"
+#     {% endfor %}
+#     """
+# )
 
 bitCoinRates
