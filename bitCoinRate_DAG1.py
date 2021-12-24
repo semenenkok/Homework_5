@@ -44,7 +44,7 @@ dag = DAG(
 )
 
 #Parameters
-host = "{{ dag_run.conf['serverName'] }}"
+host = "{{ dag_run.conf['host'] }}"
 
 def main(host):
     url = 'https://api.coincap.io/v2/rates/bitcoin'
