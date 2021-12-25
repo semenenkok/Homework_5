@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import requests
 import json
 import psycopg2
+from requests.sessions import _Data
 
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -74,8 +75,8 @@ with DAG(
         task_id="insert_bitcoinrate",
         postgres_conn_id="analytics",
         sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, type) 
-               values (%s, %s, %s, %s)""",
-        parameters = "{{ ti.xcom_pull(task_ids='getbitcoinrate') }}"
+               values ('s', '', 's', 's')""",
+        data1 = "{{ ti.xcom_pull(task_ids='getbitcoinrate') }}",
     )
 
 
