@@ -22,13 +22,13 @@ def getbitcoinrate(**kwargs):
         id = data['data']['id']
         symbol = data['data']['symbol']
         currencysymbol = data['data']['currencySymbol']
-        rateUsd = data['data']['rateUsd']
+        rateusd = data['data']['rateUsd']
         type =  data['data']['type']
 
         ti.xcom_push(value=id, key='id')
         ti.xcom_push(value=symbol, key='symbol')
-        ti.xcom_push(value=currencysymbol, key='currencySymbol')
-        ti.xcom_push(value=rateUsd, key='rateUsd')
+        ti.xcom_push(value=currencysymbol, key='currencysymbol')
+        ti.xcom_push(value=rateusd, key='rateusd')
         ti.xcom_push(value=type, key='type')
 
         # return [id, symbol, currencysymbol, type]
