@@ -83,7 +83,7 @@ with DAG(
         postgres_conn_id="analytics",
         sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
                values  (%s,%s,%s,%s,%s,)""",
-        parameters = '{{ ti.xcom_pull(task_ids='getbitcoinrate') }}'             
+        parameters = "{{ ti.xcom_pull(task_ids='getbitcoinrate') }}"             
     )
 
     # insert_bitcoinrate = PostgresOperator(
