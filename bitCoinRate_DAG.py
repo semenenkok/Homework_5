@@ -10,41 +10,40 @@ from airflow.utils.dates import days_ago
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
+def getbitcoinrate():
+    url = 'https://api.coincap.io/v2/rates/bitcoin'
+    r = requests.get(url)
+    r.encoding = 'utf-8'
+    if r.status_code == 200:
+        data = json.loads(r.text)
 
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email': ['k.semenenko@gmail.com'],
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
-    # 'queue': 'bash_queue',
-    # 'pool': 'backfill',
-    # 'priority_weight': 10,
-    # 'end_date': datetime(2016, 1, 1),
-    # 'wait_for_downstream': False,
-    # 'dag': dag,
-    # 'sla': timedelta(hours=2),
-    # 'execution_timeout': timedelta(seconds=300),
-    # 'on_failure_callback': some_function,
-    # 'on_success_callback': some_other_function,
-    # 'on_retry_callback': another_function,
-    # 'sla_miss_callback': yet_another_function,
-    # 'trigger_rule': 'all_success'
-}
+        id = data['data']['id']
+        symbol = data['data']['symbol']
+        currencysymbol = data['data']['currencySymbol']
+        rateUsd = data['data']['rateUsd']
+        type =  data['data']['type']
+
+        return [id, symbol, currencysymbol, rateUsd, type]
+
+        #insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+    else:
+        print('api response code is: ' + str(r.status_code))
+        raise
+
+def print_data(**kwargs):
+    ti = kwargs['ti']
+    print('полученные значения: '.format(ti.xcom_pull(task_id='getbitcoinrate')))
+
+
 
 with DAG(
     dag_id='bitCoinRate_DAG',
-    default_args=default_args,
-    description='BitCoinRates loader DAG',
     schedule_interval='*/30 * * * *',
     start_date=datetime(2021, 12, 20),
     catchup=False,
-    tags=['homework 5'],
+    tags=['HW5'],
 ) as dag:
 
-    # [START create_bitcoinrate_table]
     create_bitcoinrate_table = PostgresOperator(
         task_id="create_bitcoinrate_table",
         postgres_conn_id="analytics",
@@ -57,30 +56,22 @@ with DAG(
                     type           varchar(50));
             """,
     )
-    # [END create_bitcoinrate_table]
 
 
+    getbitcoinrate = PythonOperator(
+        task_id='getbitcoinrate', 
+        python_callable=getbitcoinrate,
+        dag=dag
+    )
+
+    print_data = PythonOperator(
+        task_id='print_data', 
+        python_callable=print_data,
+        dag=dag
+    )
 
 
-# def main():
-#     url = 'https://api.coincap.io/v2/rates/bitcoin'
-#     r = requests.get(url)
-#     r.encoding = 'utf-8'
-#     if r.status_code == 200:
-#         data = json.loads(r.text)
-
-#         id = data['data']['id']
-#         symbol = data['data']['symbol']
-#         currencysymbol = data['data']['currencySymbol']
-#         rateUsd = data['data']['rateUsd']
-#         type =  data['data']['type']
-
-#         insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
-#     else:
-#         print('api response code is: ' + str(r.status_code))
-#         raise
-
-
+create_bitcoinrate_table >> getbitcoinrate >> print_data
 
 
 # def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
@@ -111,10 +102,7 @@ with DAG(
 
 
 
-# bitCoinRates = PythonOperator(
-#     task_id='bitCoinRates', 
-#     python_callable=main,
-#     dag=dag)
+
 
 
 
@@ -141,4 +129,3 @@ with DAG(
 #     """
 # )
 
-create_bitcoinrate_table
