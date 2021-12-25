@@ -32,7 +32,7 @@ def getbitcoinrate():
 
 def print_data(**kwargs):
     ti = kwargs['ti']
-    print('полученные значения: {0}'.format(ti.xcom_pull(task_ids='getbitcoinrate')))
+    print('Полученные значения: {0}'.format(ti.xcom_pull(task_ids='getbitcoinrate')))
 
 
 
@@ -64,14 +64,30 @@ with DAG(
         dag=dag
     )
 
-    print_data = PythonOperator(
-        task_id='print_data', 
-        python_callable=print_data,
-        dag=dag
+    # print_data = PythonOperator(
+    #     task_id='print_data', 
+    #     python_callable=print_data,
+    #     dag=dag
+    # )
+
+    insert_bitcoinrate = PostgresOperator(
+        task_id="insert_bitcoinrate",
+        postgres_conn_id="analytics",
+        sql="""insert into bitcoinrates2 (ts, id, symbol, currencysymbol, rateusd, type) 
+               values (%s, %s, %s, %s, %s, %s)""",
+        parameters = '{{ ti.xcom_pull(task_ids='getbitcoinrate') }}',
     )
 
 
-create_bitcoinrate_table >> getbitcoinrate >> print_data
+
+    # task_insert_new_row = PostgresOperator(
+    #             task_id='insert_new_row',
+    #             trigger_rule=TriggerRule.ALL_DONE,
+    #             sql='''INSERT INTO table_name VALUES (%s, '{{ ti.xcom_pull(task_ids='execute_bash', key='return_value') }}', %s);''',
+    #             parameters=(uuid.uuid4().int % 123456789, datetime.now()))
+
+
+create_bitcoinrate_table >> getbitcoinrate >> insert_bitcoinrate
 
 
 # def insert_bitcoinRates(id, symbol, currencysymbol, rateusd, type):
