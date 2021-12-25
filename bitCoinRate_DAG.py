@@ -23,7 +23,7 @@ def getbitcoinrate():
         rateUsd = data['data']['rateUsd']
         type =  data['data']['type']
 
-        return [id, symbol, currencysymbol, rateUsd, type]
+        return (id, symbol, currencysymbol, rateUsd, type)
 
         #insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
     else:
@@ -75,12 +75,7 @@ with DAG(
         postgres_conn_id="analytics",
         sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
                values (%s, %s, %s, %s, %s)""",
-        parameters = ("{{ ti.xcom_pull(task_ids='getbitcoinrate')[0] }}",
-        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[1] }}",
-        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[2] }}",
-        1000,
-        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[4] }}",
-        )
+        parameters = "{{ ti.xcom_pull(task_ids='getbitcoinrate') }}"
     )
 
 
