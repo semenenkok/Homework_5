@@ -32,7 +32,7 @@ def getbitcoinrate():
 
 def print_data(**kwargs):
     ti = kwargs['ti']
-    print('полученные значения: '.format(ti.xcom_pull(task_id='getbitcoinrate')))
+    print('полученные значения: {0}'.format(ti.xcom_pull(task_id='getbitcoinrate')))
 
 
 
