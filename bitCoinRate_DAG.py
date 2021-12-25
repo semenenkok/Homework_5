@@ -11,7 +11,8 @@ from airflow.utils.dates import days_ago
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
-def getbitcoinrate():
+def getbitcoinrate(**kwargs):
+    ti = kwargs['ti']
     url = 'https://api.coincap.io/v2/rates/bitcoin'
     r = requests.get(url)
     r.encoding = 'utf-8'
@@ -24,9 +25,13 @@ def getbitcoinrate():
         rateUsd = data['data']['rateUsd']
         type =  data['data']['type']
 
-        return [id, symbol, currencysymbol, type]
+        ti.xcom_push(value=id, key='id')
+        ti.xcom_push(value=symbol, key='symbol')
+        ti.xcom_push(value=currencysymbol, key='currencySymbol')
+        ti.xcom_push(value=rateUsd, key='rateUsd')
+        ti.xcom_push(value=type, key='type')
 
-        #insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
+        # return [id, symbol, currencysymbol, type]
     else:
         print('api response code is: ' + str(r.status_code))
         raise
@@ -71,12 +76,17 @@ with DAG(
     #     dag=dag
     # )
 
+    
     insert_bitcoinrate = PostgresOperator(
         task_id="insert_bitcoinrate",
         postgres_conn_id="analytics",
-        sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, type) 
-               values ('s', '', 's', 's')""",
-        data1 = "{{ ti.xcom_pull(task_ids='getbitcoinrate') }}",
+        sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
+               values  ("{{ ti.xcom_pull(task_ids='getbitcoinrate', key='id') }}",
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='symbol') }}", 
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='currencysymbol') }}"
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='rateusd') }}"
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}"
+                        )""",
     )
 
 
