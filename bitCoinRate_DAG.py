@@ -23,7 +23,7 @@ def getbitcoinrate():
         rateUsd = data['data']['rateUsd']
         type =  data['data']['type']
 
-        return (id, symbol, currencysymbol, rateUsd, type)
+        return [id, symbol, currencysymbol, rateUsd, type]
 
         #insert_bitcoinRates(id, symbol, currencysymbol, rateUsd, type)
     else:
