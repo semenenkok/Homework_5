@@ -28,8 +28,8 @@ def getbitcoinrate(**kwargs):
         #сохраняем в xcom
         ti.xcom_push(key='id',              value=data['data']['id']),
         ti.xcom_push(key='symbol',          value=data['data']['symbol']),
-        ti.xcom_push(key='currencysymbol',  value=data['data']['currencysymbol']),
-        ti.xcom_push(key='rateusd',         value=data['data']['rateusd']),
+        ti.xcom_push(key='currencysymbol',  value=data['data']['currencySymbol']),
+        ti.xcom_push(key='rateusd',         value=data['data']['rateUsd']),
         ti.xcom_push(key='type',            value=data['data']['type'])
         
     else:
