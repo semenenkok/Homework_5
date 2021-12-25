@@ -75,12 +75,12 @@ with DAG(
         postgres_conn_id="analytics",
         sql="""insert into bitcoinrates2 (ts, id, symbol, currencysymbol, rateusd, type) 
                values (%s, %s, %s, %s, %s, %s)""",
-        parameters = ('{{ ti.xcom_pull(task_ids='getbitcoinrate')[0] }}',
-        '{{ ti.xcom_pull(task_ids='getbitcoinrate')[1] }}',
-        '{{ ti.xcom_pull(task_ids='getbitcoinrate')[2] }}',
-        '{{ ti.xcom_pull(task_ids='getbitcoinrate')[3] }}',
-        '{{ ti.xcom_pull(task_ids='getbitcoinrate')[4] }}',
-        '{{ ti.xcom_pull(task_ids='getbitcoinrate')[5] }}'
+        parameters = ("{{ ti.xcom_pull(task_ids='getbitcoinrate')[0] }}",
+        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[1] }}",
+        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[2] }}",
+        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[3] }}",
+        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[4] }}",
+        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[5] }}"
         )
     )
 
