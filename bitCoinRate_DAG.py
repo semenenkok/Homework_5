@@ -84,9 +84,9 @@ with DAG(
         sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
                values  ("{{ ti.xcom_pull(task_ids='getbitcoinrate', key='id') }}",
                         "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='symbol') }}", 
-                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='currencysymbol') }}"
-                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='rateusd') }}"
-                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}"
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='currencysymbol') }}",
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='rateusd') }}",
+                        "{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}",
                         )""",
     )
 
