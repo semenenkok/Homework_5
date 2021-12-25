@@ -25,13 +25,13 @@ def getbitcoinrate(**kwargs):
         rateusd = data['data']['rateUsd']
         type =  data['data']['type']
 
-        ti.xcom_push(value=id, key='id')
-        ti.xcom_push(value=symbol, key='symbol')
-        ti.xcom_push(value=currencysymbol, key='currencysymbol')
-        ti.xcom_push(value=rateusd, key='rateusd')
-        ti.xcom_push(value=type, key='type')
+        # ti.xcom_push(value=id, key='id')
+        # ti.xcom_push(value=symbol, key='symbol')
+        # ti.xcom_push(value=currencysymbol, key='currencysymbol')
+        # ti.xcom_push(value=rateusd, key='rateusd')
+        # ti.xcom_push(value=type, key='type')
 
-        # return [id, symbol, currencysymbol, type]
+        return (id, symbol, currencysymbol, type)
     else:
         print('api response code is: ' + str(r.status_code))
         raise
@@ -82,14 +82,21 @@ with DAG(
         task_id="insert_bitcoinrate",
         postgres_conn_id="analytics",
         sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
-               values  ('{{ ti.xcom_pull(task_ids='getbitcoinrate', key='id') }}',
-                        '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='symbol') }}', 
-                        '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='currencysymbol') }}',
-                         {{ ti.xcom_pull(task_ids='getbitcoinrate', key='rateusd') }},
-                        '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}'
-                        )""",
+               values  (%s,%s,%s,%s,%s,)""",
+        parameters = '{{ ti.xcom_pull(task_ids='getbitcoinrate') }}'             
     )
 
+    # insert_bitcoinrate = PostgresOperator(
+    #     task_id="insert_bitcoinrate",
+    #     postgres_conn_id="analytics",
+    #     sql="""insert into bitcoinrates2 (id, symbol, currencysymbol, rateusd, type) 
+    #            values  ('{{ ti.xcom_pull(task_ids='getbitcoinrate', key='id') }}',
+    #                     '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='symbol') }}', 
+    #                     '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='currencysymbol') }}',
+    #                      {{ ti.xcom_pull(task_ids='getbitcoinrate', key='rateusd') }},
+    #                     '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}'
+    #                     )""",
+    # )
 
 
     # task_insert_new_row = PostgresOperator(
