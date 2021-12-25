@@ -1,14 +1,12 @@
-from datetime import datetime, timedelta
-# from textwrap import dedent
-import requests
-import json
-import psycopg2
-
-
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+
+from datetime import datetime, timedelta
+import requests
+import json
+
 
 
 def getbitcoinrate(**kwargs):
@@ -37,6 +35,8 @@ def getbitcoinrate(**kwargs):
         raise
 
 
+
+
 with DAG(
     dag_id='bitCoinRate_DAG',
     schedule_interval='*/30 * * * *',
@@ -45,6 +45,9 @@ with DAG(
     tags=['HW5'],
     render_template_as_native_obj=True,  #https://airflow.apache.org/docs/apache-airflow/stable/concepts/operators.html#rendering-fields-as-native-python-objects
 ) as dag:
+
+
+
 
     create_bitcoinrate_table = PostgresOperator(
         task_id="create_bitcoinrate_table",
@@ -60,6 +63,8 @@ with DAG(
     )
 
 
+
+
     getbitcoinrate = PythonOperator(
         task_id='getbitcoinrate', 
         python_callable=getbitcoinrate,
@@ -67,6 +72,8 @@ with DAG(
     )
 
     
+
+
     insert_bitcoinrate = PostgresOperator(
         task_id="insert_bitcoinrate",
         postgres_conn_id="analytics",
@@ -78,7 +85,6 @@ with DAG(
                         '{{ ti.xcom_pull(task_ids='getbitcoinrate', key='type') }}'
                         )""",
     )
-
 
 
 create_bitcoinrate_table >> getbitcoinrate >> insert_bitcoinrate
