@@ -78,7 +78,7 @@ with DAG(
         parameters = ("{{ ti.xcom_pull(task_ids='getbitcoinrate')[0] }}",
         "{{ ti.xcom_pull(task_ids='getbitcoinrate')[1] }}",
         "{{ ti.xcom_pull(task_ids='getbitcoinrate')[2] }}",
-        "{{ ti.xcom_pull(task_ids='getbitcoinrate')[3].int }}",
+        1000,
         "{{ ti.xcom_pull(task_ids='getbitcoinrate')[4] }}",
         )
     )
