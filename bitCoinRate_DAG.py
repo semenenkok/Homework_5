@@ -48,6 +48,7 @@ with DAG(
     start_date=datetime(2021, 12, 20),
     catchup=False,
     tags=['HW5'],
+    render_template_as_native_obj=True,  #https://airflow.apache.org/docs/apache-airflow/stable/concepts/operators.html#rendering-fields-as-native-python-objects
 ) as dag:
 
     create_bitcoinrate_table = PostgresOperator(
