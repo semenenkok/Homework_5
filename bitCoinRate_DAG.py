@@ -30,7 +30,7 @@ def getbitcoinrate(**kwargs):
         ti.xcom_push(key='symbol',          value=data['data']['symbol']),
         ti.xcom_push(key='currencysymbol',  value=data['data']['currencysymbol']),
         ti.xcom_push(key='rateusd',         value=data['data']['rateusd']),
-        ti.xcom_push(key='type',            value=data['data']['type']),
+        ti.xcom_push(key='type',            value=data['data']['type'])
         
     else:
         print('api response code is: ' + str(r.status_code))
